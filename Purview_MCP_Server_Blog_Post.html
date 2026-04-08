@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>106 Tools, One MCP Server: The Complete Guide to Microsoft Purview Automation with AI</title>
+<meta name="description" content="Build a 106-tool MCP server that connects Claude Desktop and Copilot Studio to Microsoft Purview. Complete beginner guide with Azure deployment.">
+<meta name="keywords" content="Microsoft Purview, MCP Server, Claude Desktop, Copilot Studio, Audit Log, SharePoint, Sensitivity Labels, Threat Hunting, Power of Automation">
+<meta name="author" content="Power of Automation">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06080f; --bg2: #0c1019; --bg3: #111827; --card: #151c2e;
+  --border: #1e293b; --border2: #2d3a52;
+  --purple: #a78bfa; --blue: #60a5fa; --cyan: #22d3ee; --green: #34d399;
+  --orange: #fb923c; --red: #f87171; --pink: #f472b6; --yellow: #fbbf24;
+  --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+  --white: #f8fafc;
+  --glow-purple: rgba(167,139,250,.15); --glow-cyan: rgba(34,211,238,.12);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); line-height: 1.8; font-size: 18px; }
+
+/* ---- HERO ---- */
+.hero {
+  position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(99,102,241,.12), transparent),
+              radial-gradient(ellipse 60% 50% at 20% 80%, rgba(34,211,238,.08), transparent),
+              radial-gradient(ellipse 50% 40% at 80% 20%, rgba(167,139,250,.1), transparent),
+              var(--bg);
+  overflow: hidden; padding: 60px 24px;
+}
+.hero::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231e293b' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: .3;
+}
+.hero-inner { position: relative; z-index: 2; text-align: center; max-width: 900px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, rgba(167,139,250,.15), rgba(34,211,238,.15));
+  border: 1px solid rgba(167,139,250,.3); border-radius: 60px;
+  padding: 8px 24px; font-size: 13px; font-weight: 600; color: var(--purple);
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 32px;
+}
+.hero-badge::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
+.hero h1 {
+  font-family: 'Playfair Display', serif; font-size: clamp(38px, 6vw, 72px);
+  font-weight: 900; line-height: 1.05; margin-bottom: 24px;
+  background: linear-gradient(135deg, var(--white) 0%, var(--purple) 40%, var(--cyan) 70%, var(--white) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-size: 200% 200%; animation: shimmer 6s ease infinite;
+}
+@keyframes shimmer { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px); color: var(--text2); max-width: 680px;
+  margin: 0 auto 36px; font-weight: 300; line-height: 1.7;
+}
+.hero-stats {
+  display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 36px;
+}
+.hs {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 16px 28px; text-align: center; min-width: 120px;
+  backdrop-filter: blur(10px);
+}
+.hs-v { font-size: 36px; font-weight: 900; line-height: 1; }
+.hs-l { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; font-weight: 600; }
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white; padding: 16px 36px; border-radius: 14px;
+  font-size: 16px; font-weight: 700; text-decoration: none;
+  transition: all .3s; box-shadow: 0 8px 32px rgba(99,102,241,.3);
+}
+.hero-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(99,102,241,.4); }
+
+/* ---- CONTENT ---- */
+.content { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+.section { margin: 80px 0; }
+
+/* ---- SECTION HEADERS ---- */
+.sh {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 32px;
+  padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+.sh-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 18px;
+}
+.sh h2 {
+  font-family: 'Playfair Display', serif; font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 800; line-height: 1.2;
+}
+.c-purple .sh-num { background: rgba(167,139,250,.15); color: var(--purple); border: 2px solid rgba(167,139,250,.3); }
+.c-blue .sh-num { background: rgba(96,165,250,.15); color: var(--blue); border: 2px solid rgba(96,165,250,.3); }
+.c-cyan .sh-num { background: rgba(34,211,238,.15); color: var(--cyan); border: 2px solid rgba(34,211,238,.3); }
+.c-green .sh-num { background: rgba(52,211,153,.15); color: var(--green); border: 2px solid rgba(52,211,153,.3); }
+.c-orange .sh-num { background: rgba(251,146,60,.15); color: var(--orange); border: 2px solid rgba(251,146,60,.3); }
+.c-pink .sh-num { background: rgba(244,114,182,.15); color: var(--pink); border: 2px solid rgba(244,114,182,.3); }
+.c-red .sh-num { background: rgba(248,113,113,.15); color: var(--red); border: 2px solid rgba(248,113,113,.3); }
+.c-yellow .sh-num { background: rgba(251,191,36,.15); color: var(--yellow); border: 2px solid rgba(251,191,36,.3); }
+
+.c-purple h2 { color: var(--purple); } .c-blue h2 { color: var(--blue); }
+.c-cyan h2 { color: var(--cyan); } .c-green h2 { color: var(--green); }
+.c-orange h2 { color: var(--orange); } .c-pink h2 { color: var(--pink); }
+.c-red h2 { color: var(--red); } .c-yellow h2 { color: var(--yellow); }
+
+/* ---- CARDS ---- */
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px 28px; margin: 20px 0;
+  transition: border-color .3s;
+}
+.card:hover { border-color: var(--border2); }
+.card h3 {
+  font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--white);
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* ---- CODE ---- */
+pre {
+  background: #0d1117; border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px 24px; overflow-x: auto; margin: 16px 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.9;
+  color: #e6edf3;
+}
+code {
+  font-family: 'JetBrains Mono', monospace; background: rgba(167,139,250,.12);
+  padding: 2px 7px; border-radius: 6px; font-size: 14px; color: var(--cyan);
+}
+pre code { background: none; padding: 0; font-size: 13.5px; }
+
+/* ---- STEPS ---- */
+.steps { counter-reset: step; list-style: none; padding: 0; }
+.steps li {
+  counter-increment: step; position: relative;
+  padding: 14px 14px 14px 60px; margin: 10px 0;
+  background: var(--bg3); border-radius: 12px; border: 1px solid var(--border);
+  font-size: 16px; min-height: 52px; display: flex; align-items: center;
+}
+.steps li::before {
+  content: counter(step); position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px; background: rgba(167,139,250,.2);
+  border: 2px solid rgba(167,139,250,.4); border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px;
+  color: var(--purple);
+}
+
+/* ---- BOXES ---- */
+.box {
+  border-radius: 12px; padding: 16px 22px; margin: 16px 0;
+  font-size: 15px; display: flex; gap: 12px; align-items: flex-start;
+}
+.box-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.box-warn { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.25); color: #fde68a; }
+.box-tip { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.25); color: #a7f3d0; }
+.box-danger { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); color: #fca5a5; }
+.box-info { background: rgba(96,165,250,.08); border: 1px solid rgba(96,165,250,.25); color: #bfdbfe; }
+
+/* ---- PROMPT DEMOS ---- */
+.prompt {
+  background: var(--bg); padding: 12px 18px; border-radius: 10px;
+  margin: 8px 0; font-size: 15px; border-left: 4px solid var(--purple);
+  color: var(--text2);
+}
+.prompt::before { content: '💬 '; }
+
+/* ---- TABLE ---- */
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th {
+  background: var(--bg3); padding: 10px 14px; text-align: left;
+  font-weight: 700; color: var(--cyan); border-bottom: 2px solid var(--border);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:hover { background: rgba(167,139,250,.03); }
+
+/* ---- TOOL GRID ---- */
+.tg { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin: 16px 0; }
+.tc {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; font-size: 13px;
+}
+.tc h4 { font-size: 14px; margin-bottom: 6px; color: var(--white); }
+.tc span { color: var(--text3); font-family: 'JetBrains Mono', monospace; font-size: 11px; display: block; line-height: 1.6; }
+
+/* ---- FLOW DIAGRAM ---- */
+.flow {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  flex-wrap: wrap; margin: 20px 0; padding: 20px; background: var(--bg3);
+  border-radius: 14px; border: 1px solid var(--border);
+}
+.flow-step {
+  background: var(--card); border: 1px solid var(--border2); border-radius: 10px;
+  padding: 8px 16px; font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.flow-arrow { color: var(--purple); font-size: 18px; font-weight: 700; }
+
+/* ---- DIVIDER ---- */
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 60px 0; }
+
+/* ---- TOC ---- */
+.toc {
+  background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+  padding: 28px 32px; margin: -40px auto 60px; position: relative; z-index: 10;
+  max-width: 860px;
+}
+.toc h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 16px; color: var(--cyan); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+.toc a {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  border-radius: 10px; background: var(--bg3); color: var(--text);
+  text-decoration: none; font-size: 14px; font-weight: 500;
+  border: 1px solid transparent; transition: all .2s;
+}
+.toc a:hover { border-color: var(--purple); transform: translateY(-1px); }
+.toc-n {
+  width: 28px; height: 28px; border-radius: 8px; display: flex;
+  align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 12px; flex-shrink: 0;
+  background: rgba(167,139,250,.15); color: var(--purple);
+}
+
+/* ---- FOOTER ---- */
+.footer {
+  text-align: center; padding: 50px 24px; border-top: 1px solid var(--border);
+  background: var(--bg2);
+}
+.footer-brand {
+  font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 700px) {
+  body { font-size: 16px; }
+  .hero { padding: 40px 16px; min-height: auto; }
+  .content { padding: 0 16px 60px; }
+  pre { padding: 14px; font-size: 12px; }
+  .steps li { padding-left: 50px; font-size: 15px; }
+  .flow { flex-direction: column; } .flow-arrow { transform: rotate(90deg); }
+  .toc { margin: -20px 12px 40px; padding: 18px; }
+}
+
+/* ---- ANIMATED GRADIENT LINE ---- */
+.gline {
+  height: 3px; background: linear-gradient(90deg, var(--purple), var(--cyan), var(--green), var(--purple));
+  background-size: 300% 100%; animation: gradline 4s linear infinite;
+}
+@keyframes gradline { 0%{background-position:0% 0}100%{background-position:300% 0} }
+
+strong { color: var(--white); }
+a { color: var(--cyan); }
+</style>
+</head>
+<body>
+
+<div class="gline"></div>
+
+<!-- ============================================================ -->
+<!-- HERO -->
+<!-- ============================================================ -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">New · Complete Guide · 2026</div>
+    <h1>106 Tools. One MCP Server. Total Microsoft Purview Control.</h1>
+    <p class="hero-sub">
+      The step-by-step guide to building an AI-powered security command center that connects
+      <strong>Claude Desktop</strong> and <strong>Copilot Studio</strong> to Microsoft Purview,
+      SharePoint, and the entire M365 security stack — in under 30 minutes.
+    </p>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-v" style="color:var(--purple)">106</div><div class="hs-l">Tools</div></div>
+      <div class="hs"><div class="hs-v" style="color:var(--green)">12</div><div class="hs-l">Modules</div></div>
+      <div class="hs"><div class="hs-v" style="color:var(--cyan)">35</div><div class="hs-l">Audit Presets</div></div>
+      <div class="hs"><div class="hs-v" style="color:var(--orange)">7,628</div><div class="hs-l">Lines of Code</div></div>
+    </div>
+    <a href="#start" class="hero-cta">Start Building →</a>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TABLE OF CONTENTS -->
+<!-- ============================================================ -->
+<div class="toc">
+  <h3>📋 What You'll Build — 10 Steps</h3>
+  <div class="toc-grid">
+    <a href="#s1"><div class="toc-n">1</div>What is MCP?</a>
+    <a href="#s2"><div class="toc-n">2</div>Architecture Overview</a>
+    <a href="#s3"><div class="toc-n">3</div>Azure App Registration</a>
+    <a href="#s4"><div class="toc-n">4</div>API Permissions</a>
+    <a href="#s5"><div class="toc-n">5</div>Install & Build</a>
+    <a href="#s6"><div class="toc-n">6</div>Configure Claude Desktop</a>
+    <a href="#s7"><div class="toc-n">7</div>Your First Audit Search</a>
+    <a href="#s8"><div class="toc-n">8</div>Deploy to Azure</a>
+    <a href="#s9"><div class="toc-n">9</div>Connect Copilot Studio</a>
+    <a href="#s10"><div class="toc-n">10</div>All 106 Tools Reference</a>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ============================================================ -->
+<!-- SECTION 1: WHAT IS MCP -->
+<!-- ============================================================ -->
+<div id="s1" class="section c-purple">
+  <div class="sh"><div class="sh-num">1</div><h2>What is MCP and Why Should You Care?</h2></div>
+
+  <p>Imagine telling an AI assistant: <em>"Search all Copilot interactions from the last 6 months, generate an analytics report, and upload it to SharePoint"</em> — and it just <strong>does it</strong>. No scripts. No portals. No clicking through 47 tabs.</p>
+
+  <p style="margin-top:16px">That's what <strong>Model Context Protocol (MCP)</strong> makes possible. MCP is an open standard created by Anthropic that lets AI assistants like <strong>Claude</strong> and <strong>Microsoft Copilot Studio</strong> connect to external tools and APIs through a standardized interface.</p>
+
+  <div class="card" style="border-color: rgba(167,139,250,.3); margin-top:24px">
+    <h3>🎯 What This Server Does</h3>
+    <p>The <strong>Purview MCP Server</strong> gives your AI assistant <strong>106 tools</strong> to manage:</p>
+    <div class="tg" style="margin-top:12px">
+      <div class="tc"><h4>🔍 Audit Search</h4><span>Search any M365 workload audit log — Exchange, SharePoint, Teams, Entra ID, Copilot, DLP</span></div>
+      <div class="tc"><h4>📁 SharePoint</h4><span>Sites, lists, files, sharing, permissions, pages — full CRUD</span></div>
+      <div class="tc"><h4>🤖 Copilot Tracking</h4><span>Agent usage, security scans, trend analysis, HTML dashboards</span></div>
+      <div class="tc"><h4>📊 Threat Hunting</h4><span>10 MITRE ATT&CK presets, risk scoring, executive summaries</span></div>
+      <div class="tc"><h4>🏷️ Sensitivity Labels</h4><span>Apply, remove, scan labels at site/library/file level</span></div>
+      <div class="tc"><h4>🛡️ Security</h4><span>Alerts, incidents, Secure Score, eDiscovery, identity risk, KQL</span></div>
+      <div class="tc"><h4>📋 35 Workload Presets</h4><span>One-click audit search for any M365 service</span></div>
+      <div class="tc"><h4>🏥 Health & Reports</h4><span>Service health, usage reports, sign-in logs, Conditional Access</span></div>
+    </div>
+  </div>
+
+  <div class="prompt" style="margin-top:20px">"Run a brute force threat hunt for the last 30 days and score the results"</div>
+  <div class="prompt">"Apply the Confidential label to all files in the HR Documents library"</div>
+  <div class="prompt">"Run Copilot usage pipeline for last 6 months, upload to SharePoint"</div>
+  <div class="prompt">"Show me M365 service health and any current outages"</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: ARCHITECTURE -->
+<!-- ============================================================ -->
+<div id="s2" class="section c-blue">
+  <div class="sh"><div class="sh-num">2</div><h2>Architecture: How It All Connects</h2></div>
+
+  <p>The server runs in two modes — <strong>locally</strong> for Claude Desktop (stdio) and <strong>in the cloud</strong> for Copilot Studio (HTTP):</p>
+
+  <div class="card" style="margin-top:20px">
+    <h3>🖥️ Mode 1: Claude Desktop (Local)</h3>
+    <div class="flow">
+      <div class="flow-step">You type a question</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--purple)">Claude Desktop</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--cyan)">Purview MCP Server (stdio)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--green)">Microsoft Graph API</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--orange)">Purview / SharePoint</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>☁️ Mode 2: Copilot Studio (Azure)</h3>
+    <div class="flow">
+      <div class="flow-step">User asks Copilot agent</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--purple)">Copilot Studio</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--cyan)">Azure App Service</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--green)">Microsoft Graph API</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--orange)">Purview / SharePoint</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📂 Source Structure</h3>
+    <pre><code>purview-mcp-server/
+├── src/
+│   ├── index.ts              ← 106 tools + handlers (Claude Desktop)
+│   ├── web.ts                ← Azure HTTP server (Copilot Studio)
+│   ├── auth.ts               ← MSAL client credentials auth
+│   ├── audit.ts              ← Purview audit search (v1.0 → beta fallback)
+│   ├── sharepoint.ts         ← SharePoint basic operations
+│   ├── sharepoint-extended.ts← SharePoint full (28 tools)
+│   ├── scheduler.ts          ← Cron scheduling + auto reports
+│   ├── notifications.ts      ← Power Automate / Teams / Email
+│   ├── analytics.ts          ← Risk scoring + 10 MITRE threat hunts
+│   ├── copilot-tracking.ts   ← Agent tracking + HTML dashboards
+│   ├── purview-extended.ts   ← Security + labels + eDiscovery + health
+│   └── types.ts              ← TypeScript type definitions
+├── deploy-azure.ps1          ← One-command Azure deployment
+└── package.json</code></pre>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: APP REGISTRATION -->
+<!-- ============================================================ -->
+<div id="s3" class="section c-cyan">
+  <div class="sh"><div class="sh-num">3</div><h2>Create Azure App Registration</h2></div>
+
+  <ol class="steps">
+    <li>Go to <a href="https://portal.azure.com" target="_blank"><strong>portal.azure.com</strong></a> and sign in as an admin</li>
+    <li>Search for <code>App registrations</code> in the top search bar</li>
+    <li>Click <strong>+ New registration</strong></li>
+    <li>Name: <code>Purview MCP Server</code></li>
+    <li>Supported account types: <strong>Single tenant</strong></li>
+    <li>Redirect URI: leave blank → Click <strong>Register</strong></li>
+    <li>On the Overview page, copy the <strong>Application (client) ID</strong></li>
+    <li>Also copy the <strong>Directory (tenant) ID</strong></li>
+  </ol>
+
+  <div class="box box-warn"><div class="box-icon">⚠️</div><div><strong>Save both IDs!</strong> You'll need them for the MCP server configuration. Keep them somewhere safe.</div></div>
+
+  <div class="card" style="margin-top:20px">
+    <h3>🔑 Create Client Secret</h3>
+    <ol class="steps">
+      <li>In your app registration, click <strong>Certificates &amp; secrets</strong></li>
+      <li>Click <strong>+ New client secret</strong></li>
+      <li>Description: <code>Purview MCP</code> → Expires: <strong>24 months</strong></li>
+      <li>Click <strong>Add</strong></li>
+      <li><strong>IMMEDIATELY copy the Value</strong> — you can only see it once!</li>
+    </ol>
+    <div class="box box-danger"><div class="box-icon">🔴</div><div>Copy the secret <strong>NOW</strong>. Once you leave this page, it's gone forever and you'll need to create a new one.</div></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: PERMISSIONS -->
+<!-- ============================================================ -->
+<div id="s4" class="section c-green">
+  <div class="sh"><div class="sh-num">4</div><h2>Add API Permissions (18)</h2></div>
+
+  <p>Click <strong>API permissions</strong> → <strong>+ Add a permission</strong> → <strong>Microsoft Graph</strong> → <strong>Application permissions</strong>. Add all of these:</p>
+
+  <table>
+    <tr><th>Permission</th><th>Purpose</th><th>Required</th></tr>
+    <tr><td><code>AuditLogsQuery.Read.All</code></td><td>Purview audit search</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>AuditLog.Read.All</code></td><td>Sign-in + directory logs</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>Sites.ReadWrite.All</code></td><td>SharePoint sites + upload</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>Files.ReadWrite.All</code></td><td>SharePoint file operations</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>SecurityAlert.ReadWrite.All</code></td><td>Security alerts</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>SecurityIncident.ReadWrite.All</code></td><td>Security incidents</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>SecurityEvents.Read.All</code></td><td>Secure Score</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>IdentityRiskEvent.Read.All</code></td><td>Identity risk detections</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>IdentityRiskyUser.Read.All</code></td><td>Risky users</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>InformationProtectionPolicy.Read.All</code></td><td>Sensitivity labels</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>Policy.Read.All</code></td><td>Conditional Access</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>Reports.Read.All</code></td><td>M365 usage reports</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>ServiceHealth.Read.All</code></td><td>Service health</td><td style="color:var(--green)">✅ Yes</td></tr>
+    <tr><td><code>Mail.Send</code></td><td>Email notifications</td><td style="color:var(--orange)">Optional</td></tr>
+    <tr><td><code>eDiscovery.ReadWrite.All</code></td><td>eDiscovery cases</td><td style="color:var(--orange)">Optional</td></tr>
+    <tr><td><code>ThreatHunting.Read.All</code></td><td>KQL advanced hunting</td><td style="color:var(--orange)">Optional</td></tr>
+    <tr><td><code>ThreatIntelligence.Read.All</code></td><td>Threat intel articles</td><td style="color:var(--orange)">Optional</td></tr>
+    <tr><td><code>SubjectRightsRequest.ReadWrite.All</code></td><td>Privacy / DSAR</td><td style="color:var(--orange)">Optional</td></tr>
+  </table>
+
+  <div class="box box-warn"><div class="box-icon">⚠️</div><div>After adding all permissions, click <strong>"Grant admin consent for [Your Org]"</strong>. All permissions should show green checkmarks ✅.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: INSTALL & BUILD -->
+<!-- ============================================================ -->
+<div id="s5" class="section c-orange">
+  <div class="sh"><div class="sh-num">5</div><h2>Install & Build the MCP Server</h2></div>
+
+  <div class="card">
+    <h3>📋 Prerequisites</h3>
+    <ol class="steps">
+      <li><strong>Node.js 20+</strong> — download from <a href="https://nodejs.org">nodejs.org</a>. Verify: <code>node --version</code></li>
+      <li><strong>Azure CLI</strong> — download from <a href="https://aka.ms/installazurecliwindows">aka.ms/installazurecliwindows</a> (only for Azure deploy)</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>🚀 Build Steps</h3>
+    <pre><code># 1. Extract the purview-mcp-server.zip to C:\Projects\
+cd C:\Projects\purview-mcp-server
+
+# 2. Install dependencies
+npm install
+
+# 3. Build TypeScript
+npm run build
+
+# 4. Verify — should see 12 .js files in dist/
+dir dist\*.js</code></pre>
+
+    <div class="box box-tip"><div class="box-icon">✅</div><div>If <code>npm run build</code> completes with no errors, you're ready! The compiled JavaScript lives in the <code>dist/</code> folder.</div></div>
+  </div>
+
+  <div class="card">
+    <h3>🧪 Quick Test (Optional)</h3>
+    <pre><code># Set environment variables temporarily
+set PURVIEW_TENANT_ID=YOUR_TENANT_ID
+set PURVIEW_CLIENT_ID=YOUR_CLIENT_ID
+set PURVIEW_CLIENT_SECRET=YOUR_SECRET
+
+# Run the server
+node dist/index.js
+
+# Should print: [Purview MCP] Server started successfully
+# Press Ctrl+C to stop</code></pre>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6: CLAUDE DESKTOP -->
+<!-- ============================================================ -->
+<div id="s6" class="section c-pink">
+  <div class="sh"><div class="sh-num">6</div><h2>Configure Claude Desktop</h2></div>
+
+  <ol class="steps">
+    <li>Open the file <code>%APPDATA%\Claude\claude_desktop_config.json</code></li>
+    <li>Add the Purview MCP server configuration (see below)</li>
+    <li>Create the export folder: <code>C:\Projects\PurviewExports</code></li>
+    <li><strong>Fully quit Claude Desktop</strong> (right-click system tray → Quit) and reopen it</li>
+  </ol>
+
+  <pre><code>{
+  "mcpServers": {
+    "purview": {
+      "command": "node",
+      "args": ["C:\\Projects\\purview-mcp-server\\dist\\index.js"],
+      "env": {
+        "PURVIEW_TENANT_ID": "ENTER_YOUR_TENANT_ID_HERE",
+        "PURVIEW_CLIENT_ID": "ENTER_YOUR_CLIENT_ID_HERE",
+        "PURVIEW_CLIENT_SECRET": "ENTER_YOUR_SECRET_HERE",
+        "PURVIEW_EXPORT_PATH": "C:\\Projects\\PurviewExports"
+      }
+    }
+  }
+}</code></pre>
+
+  <div class="box box-info"><div class="box-icon">💡</div><div>Replace <code>ENTER_YOUR_*</code> with the values from Step 3. If you already have other MCP servers configured, add <code>"purview"</code> inside the existing <code>mcpServers</code> block.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SECTION 7: FIRST AUDIT -->
+<!-- ============================================================ -->
+<div id="s7" class="section c-yellow">
+  <div class="sh"><div class="sh-num">7</div><h2>Your First Audit Search</h2></div>
+
+  <p>Open Claude Desktop and try these commands. Each one uses a different MCP tool automatically:</p>
+
+  <div class="card">
+    <h3>Test 1: Verify Connection</h3>
+    <div class="prompt">"List all Purview audit searches"</div>
+    <p style="margin-top:8px;font-size:14px;color:var(--text3)">This confirms the MCP server is connected and auth works. Should return an empty list or existing searches.</p>
+  </div>
+
+  <div class="card">
+    <h3>Test 2: Create an Audit Search</h3>
+    <div class="prompt">"Create audit search for CopilotInteraction events from the last 7 days"</div>
+    <p style="margin-top:8px;font-size:14px;color:var(--text3)">This creates a search in Purview. It takes 2-15 minutes to complete.</p>
+  </div>
+
+  <div class="card">
+    <h3>Test 3: Check Status & Get Results</h3>
+    <div class="prompt">"Check status of my latest audit search"</div>
+    <div class="prompt" style="margin-top:4px">"Get results and export to CSV"</div>
+    <div class="box box-warn"><div class="box-icon">⏳</div><div>Audit searches take <strong>2-15 minutes</strong> to complete. The server polls automatically every 15-30 seconds. Keep checking status until it shows <code>succeeded</code>.</div></div>
+  </div>
+
+  <div class="card">
+    <h3>Test 4: All-in-One Pipeline</h3>
+    <div class="prompt">"Run Copilot usage pipeline for last 6 months, upload CSV and dashboard to SharePoint site https://mycompany.sharepoint.com/sites/Audit in Documents library"</div>
+    <div class="flow">
+      <div class="flow-step">🔍 Search</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">⏳ Wait</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">📄 CSV</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">📊 Dashboard</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">📁 SharePoint</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SECTION 8: AZURE DEPLOY -->
+<!-- ============================================================ -->
+<div id="s8" class="section c-red">
+  <div class="sh"><div class="sh-num">8</div><h2>Deploy to Azure App Service</h2></div>
+
+  <p>Deploying to Azure lets you connect the MCP server to <strong>Copilot Studio</strong> so your agents can use all 106 tools in the cloud.</p>
+
+  <div class="card">
+    <h3>🚀 One-Command Deploy</h3>
+    <pre><code>cd C:\Projects\purview-mcp-server
+
+.\deploy-azure.ps1 `
+  -TenantId "YOUR_TENANT_ID" `
+  -ClientId "YOUR_CLIENT_ID" `
+  -ClientSecret "YOUR_SECRET"</code></pre>
+    <p style="margin-top:12px;font-size:14px">The script does everything: login, create resources, build, package with <code>node_modules</code>, deploy, set startup command, verify health.</p>
+  </div>
+
+  <div class="card" style="border-color:rgba(248,113,113,.3)">
+    <h3>🔧 Key Azure Fixes Built Into the Script</h3>
+    <table>
+      <tr><th>Fix</th><th>Problem</th><th>Solution</th></tr>
+      <tr><td><strong>WAM Auth</strong></td><td><code>Device information is missing</code></td><td><code>az config set core.enable_broker_on_windows=false</code></td></tr>
+      <tr><td><strong>Build Skip</strong></td><td>Azure Oryx build fails</td><td><code>SCM_DO_BUILD_DURING_DEPLOYMENT=false</code>, include node_modules in zip</td></tr>
+      <tr><td><strong>Startup</strong></td><td>Azure resets startup command</td><td>Re-apply <code>node dist/web.js</code> after env vars + after deploy</td></tr>
+      <tr><td><strong>Boot Order</strong></td><td>App crashes before landing page</td><td>Start Express BEFORE auth initialization</td></tr>
+      <tr><td><strong>Quota</strong></td><td>Free tier F1 quota exceeded</td><td>Auto-detect + offer B1 upgrade</td></tr>
+      <tr><td><strong>MCP Transport</strong></td><td>SDK transport fails with Copilot Studio</td><td>Manual JSON-RPC handler, bypass SDK entirely</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SECTION 9: COPILOT STUDIO -->
+<!-- ============================================================ -->
+<div id="s9" class="section c-cyan">
+  <div class="sh"><div class="sh-num">9</div><h2>Connect to Copilot Studio</h2></div>
+
+  <p>After deploying to Azure, connect your Copilot Studio agent to the MCP server:</p>
+
+  <ol class="steps">
+    <li>Go to <a href="https://copilotstudio.microsoft.com" target="_blank"><strong>copilotstudio.microsoft.com</strong></a></li>
+    <li>Open your agent (or create a new one)</li>
+    <li>Click <strong>Tools</strong> → <strong>Add a tool</strong></li>
+    <li>Click <strong>New tool</strong> → select <strong>Model Context Protocol</strong></li>
+    <li>Paste your MCP URL: <code>https://YOUR-APP.azurewebsites.net/mcp</code></li>
+    <li>Auth: <strong>None</strong> → Click <strong>Create</strong></li>
+    <li>Select all 106 tools → Click <strong>Add</strong></li>
+    <li>Go to <strong>Settings</strong> → <strong>Generative AI</strong> → Turn <strong>ON</strong> Generative Orchestration</li>
+  </ol>
+
+  <div class="box box-tip"><div class="box-icon">✅</div><div>Your Copilot agent now has access to all 106 Purview tools! Ask it: <em>"Search for Copilot interactions from last 7 days"</em> and it will call the MCP tools automatically.</div></div>
+
+  <div class="box box-warn"><div class="box-icon">⚠️</div><div><strong>Generative Orchestration must be ON</strong> or MCP tools won't be called dynamically. The agent needs this to decide when to use which tool.</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- SECTION 10: ALL 106 TOOLS -->
+<!-- ============================================================ -->
+<div id="s10" class="section c-purple">
+  <div class="sh"><div class="sh-num">10</div><h2>All 106 Tools Reference</h2></div>
+
+  <div class="card"><h3>🔍 Audit Search (7)</h3>
+  <table><tr><th>Tool</th><th>Description</th></tr>
+  <tr><td><code>search_audit_log</code></td><td>Create audit search with date range, operations, services, users</td></tr>
+  <tr><td><code>get_audit_search_status</code></td><td>Check if search completed</td></tr>
+  <tr><td><code>list_audit_searches</code></td><td>List all existing searches</td></tr>
+  <tr><td><code>get_audit_results</code></td><td>Get search results (paginated)</td></tr>
+  <tr><td><code>delete_audit_search</code></td><td>Delete a search</td></tr>
+  <tr><td><code>export_audit_results</code></td><td>Export to CSV or JSON</td></tr>
+  <tr><td><code>full_audit_pipeline</code></td><td>Search → Wait → Export → Upload to SharePoint (all-in-one)</td></tr></table></div>
+
+  <div class="card"><h3>📁 SharePoint (28)</h3>
+  <table><tr><th>Tool</th><th>Description</th></tr>
+  <tr><td><code>upload_to_sharepoint</code></td><td>Upload file up to 250MB</td></tr>
+  <tr><td><code>sp_list_sites</code> / <code>sp_search</code></td><td>Find sites and content</td></tr>
+  <tr><td><code>sp_get_lists</code> / <code>sp_create_list</code></td><td>List management</td></tr>
+  <tr><td><code>sp_add_list_item</code> / <code>sp_update_list_item</code> / <code>sp_delete_list_item</code></td><td>Full CRUD on list items</td></tr>
+  <tr><td><code>sp_share_file</code> / <code>sp_get_permissions</code></td><td>Sharing and permissions</td></tr>
+  <tr><td colspan="2" style="color:var(--text3)">+ 19 more: sites, files, pages, columns, content types, analytics, subsites, recycle bin</td></tr></table></div>
+
+  <div class="card"><h3>📋 Workload Audit Presets (2 tools, 35 presets)</h3>
+  <table><tr><th>Preset</th><th>What It Searches</th></tr>
+  <tr><td><code>copilot_all</code> / <code>copilot_agents</code></td><td>All Copilot interactions + agent events</td></tr>
+  <tr><td><code>exchange_inbox_rules</code> / <code>exchange_forwarding</code></td><td>Inbox rules, auto-forwarding (BEC detection)</td></tr>
+  <tr><td><code>sharepoint_sharing</code> / <code>sharepoint_file_access</code></td><td>External sharing, file downloads</td></tr>
+  <tr><td><code>teams_meetings</code> / <code>teams_messaging</code></td><td>Meetings, messages</td></tr>
+  <tr><td><code>entra_role_changes</code> / <code>entra_app_consent</code></td><td>Privilege escalation, OAuth consent</td></tr>
+  <tr><td><code>dlp_all</code> / <code>sensitivity_label_changes</code></td><td>DLP matches, label activity</td></tr>
+  <tr><td colspan="2" style="color:var(--text3)">+ 23 more presets covering every M365 workload</td></tr></table></div>
+
+  <div class="card"><h3>🤖 Copilot Tracking (5) + Security (3)</h3>
+  <table><tr><th>Tool</th><th>Description</th></tr>
+  <tr><td><code>track_copilot_agents</code></td><td>Agent breakdown, user rankings, licensing insights</td></tr>
+  <tr><td><code>pv_copilot_usage_pipeline</code></td><td>Full pipeline: search → CSV → HTML dashboard → SharePoint</td></tr>
+  <tr><td><code>pv_copilot_agent_security</code></td><td>Agent risk analysis: auth changes, sharing, deletions</td></tr>
+  <tr><td><code>pv_copilot_full_security_scan</code></td><td>One-shot full security scan with risk score 0-100</td></tr>
+  <tr><td colspan="2" style="color:var(--text3)">+ trend analysis, report generation, scheduled reports</td></tr></table></div>
+
+  <div class="card"><h3>🏷️ Sensitivity Labels (7)</h3>
+  <table><tr><th>Tool</th><th>Scope</th><th>Description</th></tr>
+  <tr><td><code>pv_list_sensitivity_labels</code></td><td>Tenant</td><td>List all labels with ID, name, priority</td></tr>
+  <tr><td><code>pv_apply_label_to_site</code></td><td>Site</td><td>Container-level label on entire site</td></tr>
+  <tr><td><code>pv_apply_label_to_library</code></td><td>Library</td><td>Bulk apply to ALL supported files recursively</td></tr>
+  <tr><td><code>pv_set_default_library_label</code></td><td>Library</td><td>Auto-label new uploads</td></tr>
+  <tr><td><code>pv_extract_file_labels</code></td><td>Library</td><td>Scan and report which files have labels</td></tr>
+  <tr><td><code>pv_bulk_remove_labels</code></td><td>Library</td><td>Remove labels from all files</td></tr>
+  <tr><td><code>pv_remove_file_label</code></td><td>File</td><td>Remove label from single file</td></tr></table></div>
+
+  <div class="card"><h3>🛡️ Security, Health & Reports (30+)</h3>
+  <p style="font-size:14px;color:var(--text2);margin-bottom:12px">Security alerts and incidents, Secure Score, eDiscovery, identity risk, KQL advanced hunting (6 presets), retention labels, threat intelligence, DSAR/privacy requests, shadow IT detection, data exposure scanning, compliance dashboard, sign-in logs, directory audit logs, service health, Conditional Access policies, M365 usage reports (active users, email, SharePoint, Teams, OneDrive).</p></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================================ -->
+<!-- TROUBLESHOOTING -->
+<!-- ============================================================ -->
+<div class="section">
+  <div class="card" style="border-color:rgba(248,113,113,.3)">
+    <h3>🔧 Troubleshooting</h3>
+    <table>
+      <tr><th>Error</th><th>Fix</th></tr>
+      <tr><td><code>segment 'auditLog' not found</code></td><td>Server auto-retries on beta endpoint. If both fail, check AuditLogsQuery.Read.All permission.</td></tr>
+      <tr><td><code>403 Forbidden</code></td><td>Click "Grant admin consent" in API permissions (Step 4)</td></tr>
+      <tr><td>Search stuck at <code>notStarted</code></td><td>Normal — audit searches take 2-15 min. Keep polling.</td></tr>
+      <tr><td>Azure <code>403 Site Disabled</code></td><td>Free tier quota exceeded — upgrade to B1 or wait 24h</td></tr>
+      <tr><td>Copilot Studio can't find tools</td><td>Server uses manual JSON-RPC (not SDK transport). Delete old MCP tool, re-add.</td></tr>
+      <tr><td>MCP not showing in Claude</td><td>Fully quit Claude Desktop (system tray → Quit) and restart</td></tr>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- FOOTER -->
+<!-- ============================================================ -->
+<div class="footer">
+  <div class="footer-brand">
+    <span style="color:var(--purple)">Power</span>
+    <span style="color:var(--text3)"> of </span>
+    <span style="color:var(--cyan)">Automation</span>
+  </div>
+  <p style="color:var(--text3);font-size:13px;margin-top:8px">
+    <a href="https://powerofautomation2025.blogspot.com" style="color:var(--cyan)">powerofautomation2025.blogspot.com</a>
+  </p>
+  <p style="color:var(--text3);font-size:11px;margin-top:16px">
+    Purview MCP Server v6.0 · <strong style="color:var(--white)">106 Tools</strong> · 12 Modules · 7,628 Lines · TypeScript · Azure App Service · Copilot Studio
+  </p>
+  <p style="color:var(--text3);font-size:11px;margin-top:6px">© 2026 Power of Automation. All credentials shown are placeholders.</p>
+</div>
+
+<div class="gline"></div>
+
+</body>
+</html>
